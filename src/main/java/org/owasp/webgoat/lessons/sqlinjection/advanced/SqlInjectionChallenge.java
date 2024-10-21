@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import java.sql.PreparedStatement;
 
 /**
  * @author nbaars
@@ -64,10 +63,10 @@ public class SqlInjectionChallenge extends AssignmentEndpoint {
     if (attackResult == null) {
 
       try (Connection connection = dataSource.getConnection()) {
-        String checkUserQuery = "select userid from sql_challenge_users where userid = ?";
-        PreparedStatement statement = connection.prepareStatement(checkUserQuery);
-        statement.setString(1, username_reg);
-        ResultSet resultSet = statement.executeQuery();
+        String checkUserQuery =
+            "select userid from sql_challenge_users where userid = '" + username_reg + "'";
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(checkUserQuery);
         if (resultSet.next()) {
           if (username_reg.contains("tom'")) {
             attackResult = success(this).feedback("user.exists").build();
