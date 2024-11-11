@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import java.io.IOException;
 
 @RestController
 @AssignmentHints({
@@ -91,6 +92,14 @@ public class ProfileUploadRetrieval extends AssignmentEndpoint {
       var catPicture =
           new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg");
 
+        try {
+          String normalizedPath = catPicture.getCanonicalPath();
+          if (!normalizedPath.startsWith(new File(catPicturesDirectory).getCanonicalPath())) {
+            return ResponseEntity.badRequest().body("Error: Attempt to access file outside of the base directory.");
+          }
+        } catch (IOException e) {
+          return ResponseEntity.badRequest().body("Error: could not access file.");
+        }
       if (catPicture.getName().toLowerCase().contains("path-traversal-secret.jpg")) {
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
